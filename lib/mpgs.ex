@@ -343,6 +343,32 @@ defmodule Mpgs do
     |> parse_response()
   end
 
+  @doc """
+  Returns `true` if the MPGS API is operational, `false` otherwise.
+
+  Available map keys:
+  - `api_base`. Optional. Defaults to #{@api_url}.
+  - `api_version`. Optional. Defaults to #{@api_version}.
+
+  ```
+  Mpgs.check_connectivity()
+  true
+  ```
+  """
+  def check_connectivity(params \\ %{}) do
+    base = get_local_var(params, :api_base) || get_env_var("MPGS_API_BASE", @api_url)
+    version = get_local_var(params, :api_version) || get_env_var("MPGS_API_VERSION", @api_version)
+    url = "#{base}/#{version}/information"
+
+    Finch.build(:get, url)
+    |> Finch.request(MpgsFinch)
+    |> parse_response()
+    |> then(fn
+      {:ok, json} -> json["status"] == "OPERATING"
+      _ -> false
+    end)
+  end
+
   defp build_url(options, path) do
     base = get_local_var(options, :api_base) || get_env_var("MPGS_API_BASE", @api_url)
 
