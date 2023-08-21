@@ -1,7 +1,7 @@
 defmodule Mpgs.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "1.0.0"
 
   def project do
     [
@@ -25,7 +25,7 @@ defmodule Mpgs.MixProject do
   defp deps do
     [
       {:finch, "~> 0.16.0"},
-      {:jason, "~> 1.4.1"}
+      {:jason, "~> 1.4"}
     ]
   end
 end
