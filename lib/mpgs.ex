@@ -290,6 +290,29 @@ defmodule Mpgs do
     |> then(fn content -> "<html><body>#{content}</body></html>" end)
   end
 
+  def refund_transaction(params) do
+    order = get_local_var(params, :order)
+    trx = get_local_var(params, :trx)
+    amount = get_local_var(params, :amount)
+    currency = get_local_var(params, :currency, "KWD")
+    headers = build_headers(params)
+    url = build_url(params, "order/#{order}/transaction/ref-#{trx}")
+
+    payload =
+      %{
+        "apiOperation" => "REFUND",
+        "transaction" => %{
+          "amount" => amount,
+          "currency" => currency
+        }
+      }
+      |> Jason.encode!()
+
+    Finch.build(:put, url, headers, payload)
+    |> Finch.request(MpgsFinch)
+    |> parse_response()
+  end
+
   defp build_url(options, path) do
     base = get_local_var(options, :api_base) || get_env_var("MPGS_API_BASE", @api_url)
 
@@ -322,8 +345,7 @@ defmodule Mpgs do
 
   defp parse_response({:ok, %Finch.Response{status: status, body: body}})
        when status in 200..299 do
-    json = Jason.decode!(body) |> IO.inspect()
-    {:ok, json}
+    {:ok, Jason.decode!(body)}
   end
 
   defp parse_response({:ok, %Finch.Response{body: body}}), do: {:error, Jason.decode!(body)}
