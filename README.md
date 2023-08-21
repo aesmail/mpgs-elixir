@@ -44,13 +44,27 @@ params = %{
 # After a successful or a failed authentication attempt by the user,
 # call the capture_payment/1 function.
 
+# The response from the MPGS gateway is POSTED to the response_url value provided in the params.
+# The response is something like this:
+%{
+  "order.id" => "1234567890",
+  "transaction.id" => "auth-0987654321",
+  "response.gatewayRecommendation" => "PROCEED",
+  "result" => "SUCCESS"
+  "delegate" => "THREEDS",
+  "encryptedData.ciphertext" => "...",
+  "encryptedData.nonce" => "...",
+  "encryptedData.tag" => "...",
+}
+# You can check the values of "response.gatewayRecommendation" and "result" to
+# decide whether to continue with the capture_payment/1 function.
+
 # include the returned session from the authenticate_payment/1 function in the capture_payment/1 params.
 params = Map.put(params, :session, session)
-
 {:ok, response} = Mpgs.capture_payment(params)
-
 response["result"] #=> "SUCCESS"
 
+# To retrieve information about an existing order:
 order_params = %{
   api_username: "my-mpgs-username",
   api_password: "my-mpgs-password",
@@ -60,7 +74,6 @@ order_params = %{
 }
 
 {:ok, response} = Mpgs.retrieve_transaction(order_params)
-
 response["order"]["amount"] #=> 15
 response["result"] #=> "SUCCESS"
 ```
