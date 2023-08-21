@@ -263,8 +263,8 @@ defmodule Mpgs do
   Retrieves details about an existing transaction.
 
   Available map keys:
-  - `order`. Required. The same order number used with the `authenticate_payment/1` function.
-  - `trx`. Required. The same transaction number used with the `authenticate_payment/1` function.
+  - `order`. Required. The same order number used with the `capture_payment/1` function.
+  - `trx`. Required. The same transaction number used with the `capture_payment/1` function.
   - `api_username`. Required. Optional if there is an env variable called `MPGS_API_USERNAME`.
   - `api_password`. Required. Optional if there is an env variable called `MPGS_API_PASSWORD`.
   - `api_base`. Optional. Defaults to #{@api_url}.
@@ -290,6 +290,19 @@ defmodule Mpgs do
     |> then(fn content -> "<html><body>#{content}</body></html>" end)
   end
 
+  @doc """
+  Use this function to refund a paid transaction.
+
+  Available map keys:
+  - `order`. Required. The order number used with the `capture_payment/1` function.
+  - `trx`. Required. The transaction number used with the `capture_payment/1` function.
+  - `amount`. Required.
+  - `api_username`. Required. Optional if there is an env variable called `MPGS_API_USERNAME`.
+  - `api_password`. Required. Optional if there is an env variable called `MPGS_API_PASSWORD`.
+  - `api_base`. Optional. Defaults to #{@api_url}.
+  - `api_version`. Optional. Defaults to #{@api_version}.
+  - `api_merchant`. Required.
+  """
   def refund_transaction(params) do
     order = get_local_var(params, :order)
     trx = get_local_var(params, :trx)
