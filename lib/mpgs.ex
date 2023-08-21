@@ -23,17 +23,22 @@ defmodule Mpgs do
   - `api_base`. Optional. Defaults to #{@api_url}.
   - `api_version`. Optional. Defaults to #{@api_version}.
   - `api_merchant`. Required.
+  - `session`. Optional. A new session will be created if this key does not exist.
   - `currency`. Optional. The 3-digit currency code. Defaults to KWD.
   - `amount`. Required. It must be a number that indicates the total amount to be paid.
-  - `card_number`. Required. The 16-digit card number used for the payment.
-  - `expiry_month`. Required. The card's 2-digit expiry month.
-  - `expiry_year`. Required. The card's 2-digit expiry year.
-  - `security_code`. Required. The card's 3-digit (or 4-digit) CVV code.
+  - `card_number`. Required. The 16-digit card number used for the payment. Optional if the session is provided and it already contains the card data.
+  - `expiry_month`. Required. The card's 2-digit expiry month.  Optional if the session is provided and it already contains the card data.
+  - `expiry_year`. Required. The card's 2-digit expiry year.  Optional if the session is provided and it already contains the card data.
+  - `security_code`. Required. The card's 3-digit (or 4-digit) CVV code.  Optional if the session is provided and it already contains the card data.
   - `order`. Required. The order number.
   - `trx`. Required. The transaction number.
   - `response_url`. Required. The URL that will receive the authentication response from the MPGS gateway.
   - `browser_agent`. Required. The user's browser agent string.
   - `full_page_redirect`. Optional. If `true`, this function will return a complete html document which can be rendered as a full page.
+
+  If you are not PCI compliant, you should provide a session which already contains card details.
+
+  This session is obtained by the MPGS gateway through the [Hosted Session Integration](https://ap-gateway.mastercard.com/api/documentation/integrationGuidelines/hostedSession/integrationModelHostedSession.html) guide:
 
   Return values:
   - `{:ok, session, html}`. The `html` value should be rendered on the client's web browser. The `session` should be used with the `capture_payment/1` function.
@@ -48,10 +53,15 @@ defmodule Mpgs do
     api_merchant: "my-mpgs-merchant",
     amount: "15",
     currency: "KWD",
+
+    # include a session which contains card details:
+    session: "SESSION2483924783297489234",
+    # or include card details:
     card_number: "1234567890123456",
     expiry_month: "10",
     expiry_year: "25",
     security_code: "123",
+
     order: "0123456789",
     trx: "0987654321",
     response_url: "http://example.com/payment/mpgs/response/",
@@ -69,9 +79,17 @@ defmodule Mpgs do
   """
   @spec authenticate_payment(map()) :: {:ok, String.t(), String.t()}
   def authenticate_payment(params) do
-    {:ok, result} = create_session(params)
-    session = result["session"]["id"]
-    params = Map.put(params, :session, session)
+    case get_local_var(params, :session) do
+      nil ->
+        {:ok, result} = create_session(params)
+        session = result["session"]["id"]
+        params = Map.put(params, :session, session)
+        {:ok, _result} = update_session_data(params)
+
+      _session ->
+        {:ok, _result} = update_session_data(params, false)
+    end
+
     {:ok, _result} = update_session_data(params)
     {:ok, _result} = initiate_authentication(params)
     {:ok, result} = authenticate_payer(params)
@@ -83,6 +101,7 @@ defmodule Mpgs do
         result["authentication"]["redirect"]["html"]
       end
 
+    session = get_local_var(params, :session)
     {:ok, session, html}
   end
 
@@ -101,7 +120,7 @@ defmodule Mpgs do
     |> parse_response()
   end
 
-  defp update_session_data(params) do
+  defp update_session_data(params, include_card_details \\ true) do
     session = get_local_var(params, :session)
     currency = get_local_var(params, :currency, "KWD") |> String.upcase()
     amount = get_local_var(params, :amount)
@@ -118,21 +137,31 @@ defmodule Mpgs do
         "order" => %{
           "amount" => amount,
           "currency" => currency
-        },
-        "sourceOfFunds" => %{
-          "type" => "CARD",
-          "provided" => %{
-            "card" => %{
-              "number" => card_number,
-              "expiry" => %{
-                "month" => expiry_month,
-                "year" => expiry_year
-              },
-              "securityCode" => security_code
-            }
-          }
         }
       }
+
+    payload =
+      case include_card_details do
+        true ->
+          funds = %{
+            "type" => "CARD",
+            "provided" => %{
+              "card" => %{
+                "number" => card_number,
+                "expiry" => %{
+                  "month" => expiry_month,
+                  "year" => expiry_year
+                },
+                "securityCode" => security_code
+              }
+            }
+          }
+
+          Map.put(payload, "sourceOfFunds", funds)
+
+        false ->
+          payload
+      end
       |> Jason.encode!()
 
     Finch.build(:put, url, headers, payload)

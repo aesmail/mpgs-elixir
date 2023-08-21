@@ -2,9 +2,9 @@
 
 This package deals with the MasterCard Payment Gateway Service (MPGS).
 
-Check the MPGS API documentation for more details:
+Check the [online documentation](https://hexdocs.pm/mpgs/).
 
-https://ap-gateway.mastercard.com/api/documentation/apiDocumentation/rest-json/version/latest/api.html?locale=en_US
+Check the [MPGS API documentation](https://ap-gateway.mastercard.com/api/documentation/apiDocumentation/rest-json/version/latest/api.html?locale=en_US) for more details:
 
 ## Installation
 
@@ -16,9 +16,6 @@ def deps do
 end
 ```
 
-Documentation can be found at <https://hexdocs.pm/mpgs>.
-
-
 ## Examples
 
 ```elixir
@@ -28,6 +25,9 @@ params = %{
   api_merchant: "my-mpgs-merchant",
   amount: "15",
   currency: "KWD",
+  # provide either a session containing card details (check the online docs for more details)
+  session: "SESSION3920348329483922932039",
+  # or the actual card details (number, expiry, security code)
   card_number: "1234567890123456",
   expiry_month: "10",
   expiry_year: "25",
@@ -91,4 +91,8 @@ order_params = %{
 {:ok, response} = Mpgs.refund_transaction(params)
 response["result"] #=> "SUCCESS"
 response["order"]["status"] #=> "REFUNDED"
+
+# check MPGS availability: true if the API is reachable and operational, false otherwise.
+Mpgs.check_availability()
+true
 ```
