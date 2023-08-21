@@ -33,7 +33,7 @@ defmodule Mpgs do
   - `trx`. Required. The transaction number.
   - `response_url`. Required. The URL that will receive the authentication response from the MPGS gateway.
   - `browser_agent`. Required. The user's browser agent string.
-  - `full_page_redirect`. Optional. If `true`, this function will return a complete html which can be rendered as a full page.
+  - `full_page_redirect`. Optional. If `true`, this function will return a complete html document which can be rendered as a full page.
 
   Return values:
   - `{:ok, session, html}`. The `html` value should be rendered on the client's web browser. The `session` should be used with the `capture_payment/1` function.
