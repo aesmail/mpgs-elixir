@@ -2,6 +2,7 @@ defmodule Mpgs.MixProject do
   use Mix.Project
 
   @version "1.0.0"
+  @source_url "https://github.com/aesmail/mpgs-elixir"
 
   def project do
     [
@@ -9,6 +10,8 @@ defmodule Mpgs.MixProject do
       version: @version,
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
+      package: package(),
+      description: description(),
       deps: deps()
     ]
   end
@@ -28,5 +31,19 @@ defmodule Mpgs.MixProject do
       {:jason, "~> 1.4"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
+  end
+
+  defp package() do
+    [
+      maintainers: ["Abdullah Esmail"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => @source_url
+      }
+    ]
+  end
+
+  defp description() do
+    "An elixir package for dealing with the MasterCard Payment Gateway Service (MPGS)"
   end
 end
