@@ -39,7 +39,7 @@ params = %{
   full_page_redirect: true,
 }
 
-{:ok, session, html} = authenticate_payment(params)
+{:ok, session, html} = Mpgs.authenticate_payment(params)
 # Send and render the html on client's browser.
 # After a successful or a failed authentication attempt by the user,
 # call the capture_payment/1 function.
@@ -47,7 +47,7 @@ params = %{
 # include the returned session from the authenticate_payment/1 function in the capture_payment/1 params.
 params = Map.put(params, :session, session)
 
-{:ok, response} = capture_payment(params)
+{:ok, response} = Mpgs.capture_payment(params)
 
 response["result"] #=> "SUCCESS"
 
