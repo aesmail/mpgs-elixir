@@ -3,6 +3,7 @@ defmodule Mpgs do
   This module deals with the MasterCard Payment Gateway Service (MPGS).
 
   Check the MPGS API documentation for more details:
+
   https://ap-gateway.mastercard.com/api/documentation/apiDocumentation/rest-json/version/latest/api.html?locale=en_US
   """
 
@@ -281,7 +282,7 @@ defmodule Mpgs do
     |> parse_response()
   end
 
-  def rebuild_html_form(html) do
+  defp rebuild_html_form(html) do
     html
     |> String.replace(~s/target="challengeFrame"/, "")
     |> String.replace("iframe", "div")
