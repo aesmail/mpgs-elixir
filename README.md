@@ -76,4 +76,19 @@ order_params = %{
 {:ok, response} = Mpgs.retrieve_transaction(order_params)
 response["order"]["amount"] #=> 15
 response["result"] #=> "SUCCESS"
+
+# Refund a transaction
+order_params = %{
+  api_username: "my-mpgs-username",
+  api_password: "my-mpgs-password",
+  api_merchant: "my-mpgs-merchant",
+  order: "0123456789",
+  trx: "0987654321",
+  amount: "15",
+  currency: "KWD"
+}
+
+{:ok, response} = Mpgs.refund_transaction(params)
+response["result"] #=> "SUCCESS"
+response["order"]["status"] #=> "REFUNDED"
 ```
