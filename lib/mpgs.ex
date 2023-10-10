@@ -259,7 +259,7 @@ defmodule Mpgs do
   - `api_version`. Optional. Defaults to #{@api_version}.
   - `api_merchant`. Required.
   """
-  def capture_payment(params) do
+  def capture_payment(params, extra_params \\ %{}) do
     session = get_local_var(params, :session)
     currency = get_local_var(params, :currency, "KWD") |> String.upcase()
     amount = get_local_var(params, :amount)
@@ -278,6 +278,7 @@ defmodule Mpgs do
           "reference" => order
         }
       }
+      |> Map.merge(extra_params)
       |> Jason.encode!()
 
     url = build_url(params, "order/#{order}/transaction/#{trx}")
