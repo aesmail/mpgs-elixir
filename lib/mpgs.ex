@@ -260,7 +260,7 @@ defmodule Mpgs do
   - `api_merchant`. Required.
   """
   def capture_payment(params, extra_params \\ %{}) do
-    session = get_local_var(params, :session)
+    # session = get_local_var(params, :session)
     currency = get_local_var(params, :currency, "KWD") |> String.upcase()
     amount = get_local_var(params, :amount)
     order = get_local_var(params, :order)
@@ -269,7 +269,7 @@ defmodule Mpgs do
     payload =
       %{
         "apiOperation" => "PAY",
-        "session" => %{"id" => session},
+        # "session" => %{"id" => session},
         "authentication" => %{"transactionId" => "auth-" <> trx},
         "transaction" => %{"reference" => order},
         "order" => %{
