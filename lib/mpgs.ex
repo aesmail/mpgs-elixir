@@ -270,7 +270,7 @@ defmodule Mpgs do
       %{
         "apiOperation" => "PAY",
         # "session" => %{"id" => session},
-        "authentication" => %{"transactionId" => "auth-" <> trx},
+        # "authentication" => %{"transactionId" => "auth-" <> trx},
         "transaction" => %{"reference" => order},
         "order" => %{
           "currency" => currency,
